@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Happy Birthday My Love ❤️</title>
+
+<style>
+body {
+    margin: 0;
+    height: 100vh;
+    background: radial-gradient(circle at top, #0b1d3a, #020617);
+    overflow: hidden;
+    font-family: 'Segoe UI', sans-serif;
+    color: white;
+}
+
+/* START SCREEN */
+#startScreen {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 10;
+}
+
+#startHeart {
+    font-size: 160px;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+}
+
+/* MAIN */
+#main {
+    display: none;
+    height: 100vh;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 40px;
+    box-sizing: border-box;
+}
+
+/* MESSAGE */
+#text {
+    width: 38%;
+    opacity: 0;
+    animation: slideIn 2s ease forwards;
+    animation-delay: 6s;
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateX(-60px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+h1 {
+    font-size: 3em;
+}
+
+p {
+    font-size: 1.15em;
+    line-height: 1.6;
+}
+
+/* CANVAS */
+canvas {
+    width: 55%;
+    height: 80vh;
+}
+
+/* COUNTER */
+#counter {
+    position: absolute;
+    bottom: 30px;
+    right: 60px;
+    font-size: 20px;
+    opacity: 0.85;
+}
+
+/* FLOATING HEARTS */
+.float {
+    position: absolute;
+    font-size: 18px;
+    animation: floatUp 6s linear infinite;
+}
+
+@keyframes floatUp {
+    0% { transform: translateY(100vh); opacity: 0; }
+    50% { opacity: 1; }
+    100% { transform: translateY(-10vh); opacity: 0; }
+}
+
+/* FIREWORKS */
+.firework {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    animation: explode 1.2s ease-out forwards;
+}
+
+@keyframes explode {
+    from { transform: scale(0.2); opacity: 1; }
+    to { transform: scale(18); opacity: 0; }
+}
+</style>
+</head>
+
+<body>
+
+<audio id="music" preload="auto" loop>
+    <source src="birthday.webm" type="audio/webm">
+</audio>
+
+<!-- START -->
+<div id="startScreen" onclick="start()">
+    <div style="text-align:center;">
+        <div id="startHeart">❤️</div>
+        <p>Tap the heart 💕</p>
+    </div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+    <div id="text">
+        <h1>Happy Birthday My Love ❤️</h1>
+        <p>
+            Palak Baby Like these hearts that slowly come together,  
+            my love for you grows more every single day.  
+            <br><br>
+            You are my smile, my peace, my forever.  
+            <br><br>
+            Happy Birthday Baby🎂✨  
+            I will love you endlessly 💕
+        </p>
+    </div>
+
+    <canvas id="canvas"></canvas>
+</div>
+
+<div id="counter">I love you 0</div>
+
+<script>
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+let particles = [];
+let count = 0;
+let counterInterval;
+
+function resizeCanvas() {
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+}
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
+
+/* HEART SHAPE */
+function heartFormula(t) {
+    return {
+        x: 16 * Math.pow(Math.sin(t), 3),
+        y: -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t))
+    };
+}
+
+/* TREE-LIKE HEART FILL */
+function createHeartParticles() {
+    for (let t = 0; t < Math.PI * 2; t += 0.05) {
+        const p = heartFormula(t);
+        particles.push({
+            x: canvas.width / 2 + p.x * 15,
+            y: canvas.height / 2 + p.y * 15,
+            a: 0
+        });
+    }
+}
+
+function drawHeart() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => {
+        if (p.a < 1) p.a += 0.01;
+        ctx.fillStyle = `rgba(255,80,130,${p.a})`;
+        ctx.font = "14px Arial";
+        ctx.fillText("❤️", p.x, p.y);
+    });
+    requestAnimationFrame(drawHeart);
+}
+
+/* COUNTER */
+function startCounter() {
+    counterInterval = setInterval(() => {
+        if (count < 3000) {
+            count += Math.floor(Math.random() * 25) + 5;
+            if (count > 3000) count = 3000;
+            document.getElementById("counter").innerText = "I love you " + count;
+        } else {
+            clearInterval(counterInterval);
+        }
+    }, 120);
+}
+
+/* START */
+function start() {
+    document.getElementById("startScreen").style.display = "none";
+    document.getElementById("main").style.display = "flex";
+
+    const music = document.getElementById("music");
+    music.volume = 0.4;
+    music.play();
+
+    createHeartParticles();
+    drawHeart();
+    startCounter();
+
+    setInterval(createFloatingHeart, 300);
+    setInterval(createFirework, 700);
+}
+
+/* FLOATING HEARTS */
+function createFloatingHeart() {
+    const h = document.createElement("div");
+    h.className = "float";
+    h.innerHTML = "❤️";
+    h.style.left = Math.random() * 100 + "vw";
+    h.style.animationDuration = (Math.random() * 3 + 3) + "s";
+    document.body.appendChild(h);
+    setTimeout(() => h.remove(), 6000);
+}
+
+/* FIREWORKS */
+function createFirework() {
+    const f = document.createElement("div");
+    f.className = "firework";
+    f.style.left = Math.random() * 100 + "vw";
+    f.style.top = Math.random() * 60 + "vh";
+    f.style.background = `hsl(${Math.random()*360},100%,70%)`;
+    document.body.appendChild(f);
+    setTimeout(() => f.remove(), 1200);
+}
+</script>
+
+</body>
+</html>
